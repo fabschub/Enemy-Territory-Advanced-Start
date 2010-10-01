@@ -15,14 +15,16 @@ $Curses::UI::debug = 0;
 my $Config = Config::Tiny->new();
 my $etas_conf = "$ENV{'HOME'}/.config/etas.conf";
 if ( !-e $etas_conf ) {
+  $Config->{_}->{etworkdir} = '/usr/local/games/enemy-territory';
   $Config->{options}->{newx} = '0';
-  $Config->{options}->{mumble} = '0';;
+  $Config->{options}->{mumble} = '0';
   $Config->write( "$etas_conf" );
 }
 
 
 $Config = Config::Tiny->read( "$etas_conf" );
 # Reading properties
+my $etworkdir = $Config->{_}->{etworkdir};
 my $newx = $Config->{options}->{newx};
 my $mumble = $Config->{options}->{mumble};
 
@@ -53,29 +55,29 @@ my $cui = new Curses::UI(
 my $win1 = $cui->add(
   'win1', 'Window',
   -border => 1,
-  -y    => 1,
-  -bfg  => 'red');
+  -y      => 1,
+  -bfg    => 'red');
 
 
 $win1->add("d1", "TextEntry", 
-  -border => 0,
-	-fg => "green",
-	-x => 2 ,
-	-y => 1 ,
-	-width => 5,
-	-text => "Name",
-	-focusable => 0,
-	-readonly => 1,
+  -border    => 0,
+  -fg        => "green",
+  -x         => 2 ,
+  -y         => 1 ,
+  -width     => 5,
+  -text      => "Name",
+  -focusable => 0,
+  -readonly  => 1,
 );
 
 
 my $name_input = $win1->add(
   "name_input", "TextEntry", 
   -border => 1,
-  -bfg => "blue",
-  -x => 10 ,
-  -width => 22,
-  -text => "$name"
+  -bfg    => "blue",
+  -x      => 10 ,
+  -width  => 22,
+  -text   => "$name"
 );
 
 
@@ -124,16 +126,16 @@ my $options_lbox = $win1->add(
 my $but1 = $win1->add("addbutton", "Buttonbox" ,
   -buttons => [ { -label => "< Start ET >", -onpress => \&start } ] ,
   -border  => 0,
-  -y => 18,
-  -x => 40
+  -y       => 18,
+  -x       => 40
 );
 
 
 sub exit_dialog() {
   my $return = $cui->dialog(
-      -message   => "Do you really want to quit?",
-      -title     => "Are you sure???",
-      -buttons   => ['yes', 'no'],
+    -message   => "Do you really want to quit?",
+    -title     => "Are you sure???",
+    -buttons   => ['yes', 'no'],
   );
 
   exit(0) if $return;
@@ -141,6 +143,7 @@ sub exit_dialog() {
 
 
 sub rname {
+# just use random-hostname from GRML distribution at the moment
   $name_input->text(`random-hostname`);
 }
 
@@ -159,8 +162,7 @@ sub start {
   $Config->{options}->{newx} = '0';
   $Config->{options}->{mumble} = '0';
   # If options are checked, set them to 1 (enabled)
-  my @sel = $options_lbox->get();
-  foreach (@sel) {
+  foreach (@optstat) {
     $Config->{options}->{$_} = '1';
   }
   # Write config file
@@ -178,7 +180,7 @@ sub start {
   }
 
   # Start Enemy Territory
-  exec ("$xinit " .  "$overlay " . "et" . " @ARGV " . "+name '$name'" . " $display");
+  exec ("$xinit " .  "$overlay " . "$etworkdir\/et" . " @ARGV " . "+name '$name'" . " $display");
 
   exit(0);
 }
